@@ -15,9 +15,11 @@ class Game(models.Model):
         return f'{self.user1} vs {self.user2}'
 
 class GameRound(models.Model):
+    round_number = models.IntegerField(primary_key=True)
     game = models.ForeignKey(Game, on_delete=models.PROTECT, related_name='rounds')
 
 class GameQuestion(models.Model):
+    question_number = models.IntegerField(primary_key=True)
     round = models.ForeignKey(GameRound, on_delete=models.PROTECT, related_name='questions')
     question = models.ForeignKey("questions.Question", on_delete=models.PROTECT)
     user1_answer = models.ForeignKey("questions.Answer", on_delete=models.PROTECT)
