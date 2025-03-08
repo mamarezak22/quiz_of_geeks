@@ -1,0 +1,13 @@
+- databases
+- network & security
+- os
+- server/side development
+- client/side developement
+- programming languages
+- ai & data science
+- devops
+- data structure & algorithms
+- blockchain
+- IOT
+- hardware
+- game development
