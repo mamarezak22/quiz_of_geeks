@@ -6,12 +6,11 @@ class TelegramUser(models.Model):
     def __str__(self):
         return self.numeric_id
 
-class UserHistory(models.Model):
-    user = models.ForeignKey("TelegramUser", on_delete=models.CASCADE)
-    count_of_won_games = models.IntegerField(default=0)
-    count_of_lose_games = models.IntegerField(default=0)
-    count_of_correct_answer = models.IntegerField(default=0)
+class TelegramUserAnswerHistory(models.Model):
+    telegram_user = models.ForeignKey("TelegramUser", on_delete=models.CASCADE)
+    question = models.ForeignKey("questions.Question", on_delete=models.CASCADE)
+    user_answer = models.ForeignKey("questions.Answer", on_delete=models.CASCADE)
+    is_correct = models.BooleanField(default=False)
+    answered_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f'history of {self.user}'
 
