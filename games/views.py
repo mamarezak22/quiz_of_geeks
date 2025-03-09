@@ -75,7 +75,7 @@ class QuestionDetailView(APIView):
     if not a new gamequestion object creates and time starts for that user"""
     def get(self,game_id,round_number,question_number):
         try :
-            game = Game.objects.get(id=game_id,status = started)
+            game = Game.objects.get(id=game_id,status = "started")
         except Game.DoesNotExist:
             return Response({'detail' : 'Game does not exist'}, status=status.HTTP_404_NOT_FOUND)
         try :
@@ -181,11 +181,8 @@ class GameResultView(APIView):
             return Response({'detail' : 'Game does not exist'}, status=status.HTTP_404_NOT_FOUND)
         game_rounds = GameRound.objects.filter(game = game)
         status = game.status
-        total_user1_score = 0
-        total_user2_score = 0
-        for game_round in game_rounds:
-            total_user1_score += game_round.user1_score
-            total_user2_score += game_round.user2_score
+        total_user1_score = sum(round.user1_score for round in game_rounds)
+        total_user2_score = sum(round.user2_score for round in game_rounds) 
         return Response({"status" : status,
                          "user1_score" : total_user1_score,
                          "user2_score" : total_user2_score},
