@@ -1,4 +1,6 @@
 import random
+from tabnanny import check
+
 from django.db.models.query_utils import Q
 from django.utils import timezone
 
@@ -7,11 +9,10 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from questions.models import Category
-from .models import Game,GameRound,GameResult,GameQuestion
+from .models import Game,GameRound,GameQuestion
 from users.models import User
-from questions.models import Question,Answer
-from .serializers import GameSerializer, GameRoundSerializer, GameResultSerializer, GameQuestionSerializer, \
-    UserSerializer
+from questions.models import Question
+from .serializers import UserSerializer
 
 
 #/game/start
@@ -23,10 +24,10 @@ class StartGameView(APIView):
         return False
 
     def post(self, request):
-        '''if the user with that id exist and have no other game
+        """if the user with that id exist and have no other game
         we looking for last game
                 if last started game has not started and wait for a user, our user joins the game.
-                 if not a new game created'''
+                 if not a new game created"""
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             try :
@@ -60,18 +61,18 @@ class SelectCategoryView(APIView):
                 try :
                     category = Category.objects.get(name=category_name)
                 except Category.DoesNotExist:
-                    return Response({'detail' : 'invalid category'}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({'detail' : 'invalid selected_category'}, status=status.HTTP_404_NOT_FOUND)
                 GameRound.objects.create(game = game, category = category,round_number =game.current_round+1)
                 game.currrent_round += 1
                 game.save()
-                return Response({'detail' : 'category been selected'}, status=status.HTTP_200_OK)
+                return Response({'detail' : 'selected_category been selected'}, status=status.HTTP_200_OK)
 
 #game/{game_id}/round/{round_number}/question/{question_number}
 class QuestionDetailView(APIView):
-    '''see the detail of a gamequestion
+    """see the detail of a gamequestion
     if the question been answered by the first in turn user now the seconde user sees that and start time for that user
     starts.
-    if not a new gamequestion object creates and time starts for that user'''
+    if not a new gamequestion object creates and time starts for that user"""
     def get(self,game_id,round_number,question_number):
         try :
             game = Game.objects.get(id=game_id)
@@ -94,11 +95,11 @@ class QuestionDetailView(APIView):
                 question.save()
             return Response({'question' : question.text},status = status.HTTP_200_OK)
         else:
-            category_releated_questions = Question.objects.filter(category__name = round.category)
+            category_releated_questions = Question.objects.filter(category__name = round.selected_category)
             if category_releated_questions.count() > 3:
                 random_selected_question = random.choice(category_releated_questions)
             else:
-                return Response({'detail' : 'not question in this category'},status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail' : 'not question in this selected_category'},status=status.HTTP_400_BAD_REQUEST)
 
         if round.turn == 1:
             question = GameQuestion.objects.create(question_number = question_number,
@@ -116,35 +117,59 @@ class QuestionDetailView(APIView):
 
 #game/{game_id}/round/{round_number}/question/{question_number}/submit
 class SubmitAnswerView(APIView):
+    def check_end_game(self,round_number,question_number,game):
+        # if we in round5 and question3 and turn of user2 it means the game ended after answering the question.
+        if round_number == 5 and question_number == 3 and game.turn == 2:
+            return True
+        return False
+
+    def is_correct_answer(self,question,user_answer):
+        """gets the gamequestion object and the answer that user sends to that and check if it is correct"""
+        correct_answer = question.question.answers.get(is_correct = True)
+        if user_answer == correct_answer:
+            return True
+        return False
+
     def post(self,request,game_id,round_number,question_number):
         game = Game.objects.get(id=game_id)
         round = GameRound.objects.get(game = game,
                                       round_number=round_number)
         question = GameQuestion.objects.get(question_number = question_number,
                                             round = round)
-
+        detail_text = str()
+        is_ended = self.check_end_game(round_number,question_number,game)
         if round.turn == 1:
             answer_taken_time = timezone.now() - question.start_time_for_user1
-            if answer_taken_time < 0:
-                return Response({'detail' : 'the time for answer has end'},status=status.HTTP_200_OK)
+            if answer_taken_time.total_seconds() < 30:
+                detail_text = 'time been ended'
             else:
                 question.user1_answer = request.data.get['answer']
                 question.save()
+                if self.is_correct_answer(question,question.user1_answer):
+                    detail_text = 'correct answer'
+                    round.user1_point += 1
+                else:
+                    detail_text = 'wrong answer'
         else:
             answer_taken_time = timezone.now() - question.start_time_for_user2
-            if answer_taken_time < 0:
-                return Response({'detail' : 'the time for answer has end'},status=status.HTTP_200_OK)
+            if answer_taken_time.total_seconds() < 30:
+                detail_text = 'time has been ended'
             else:
                 question = GameQuestion.objects.get(question_number = question_number,
                                                 round = round)
                 question.user2_answer = request.data.get['answer']
                 question.save()
-        question_answers = question.question.answers.all()
-        correct_answer = question_answers.objects.get(is_correct=True)
-        if question.user1_answer != correct_answer:
-            return Response({'detail': 'wrong answer'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'detail': 'correct answer'}, status=status.HTTP_200_OK)
+                if self.is_correct_answer(question,question.user2_answer):
+                    detail_text = 'correct answer'
+                    round.user2_point += 1
+                else:
+                    detail_text = 'wrong answer'
+
+        if is_ended:
+            game.status = 'ended'
+            game.end_time = timezone.now()
+            game.save()
+        return Response({'detail' : detail_text},status=status.HTTP_200_OK)
 
 
 #game/{game_id}/result

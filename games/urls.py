@@ -7,7 +7,7 @@ urlpatterns = [
     path('game/<int:game_id>/round/<int:round_number>/select_category',
          SelectCategoryView.as_view()),
     path('game/<int:game_id>/round/<int:round_number>/question/<int:question_number>',
-         QuestionDetailView.as_view())
+         QuestionDetailView.as_view()),
     path('game/<int:game_id>/round/<int:round_number>/question/<int:question_number>/submit',
          SubmitAnswerView.as_view()),
     path('game/<int:game_id>/result',

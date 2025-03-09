@@ -1,14 +1,15 @@
 from django.db import models
 
 class Game(models.Model):
+    #user 1 means the first user that goes in searching for a game.
     game_statuses = (
         ('pre-started', 'Pre-started'),
         ('started', 'Started'),
         ('ended', 'Ended'),
     )
-    user1 = models.ForeignKey("users.User", on_delete=models.PROTECT,related_name='games')
-    user2 = models.ForeignKey("users.User", on_delete=models.PROTECT,related_name='games',blank=True, null=True)
-    game_status = models.CharField(max_length=20,choices=game_statuses)
+    user1 = models.ForeignKey("users.User", on_delete=models.SET_NULL,related_name='games')
+    user2 = models.ForeignKey("users.User", on_delete=models.SET_NULL,related_name='games',blank=True, null=True)
+    status = models.CharField(max_length=20,choices=game_statuses)
     created_at = models.DateTimeField(auto_now_add =True)
     ended_at = models.DateTimeField(blank=True, null=True)
     # 0 means we are in pre-started status
@@ -21,13 +22,14 @@ class Game(models.Model):
 class GameRound(models.Model):
     round_number = models.IntegerField(default = 1)
     game = models.ForeignKey("Game", on_delete=models.PROTECT, related_name='rounds')
-    category = models.ForeignKey("questions.Category", on_delete=models.PROTECT)
-    created_at = models.DateTimeField(auto_now_add =True)
-    count_of_answered_users = models.IntegerField(default=0)
+    selected_category = models.ForeignKey("questions.Category", on_delete=models.PROTECT)
+    count_of_passed_users = models.IntegerField(default=0)
     user1_score = models.IntegerField(default=0)
     user2_score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add =True)
 
     @property
+    #1 as return value means user1 and 2 as user2.
     def starter_user(self):
         if self.round_number %2 == 0:
             return 2
