@@ -2,7 +2,7 @@ from django.db import models
 
 class Question(models.Model):
     text = models.CharField(max_length=300)
-    category = models.ForeignKey('Category',on_delete=models.CASCADE,related_name='questions')
+    category = models.ForeignKey('Category',on_delete=models.CASCADE,related_name='questions',unique = True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

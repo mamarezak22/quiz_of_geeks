@@ -1,6 +1,6 @@
 from django.db import models
 
-class TelegramUser(models.Model):
+class User(models.Model):
     numeric_id = models.IntegerField(primary_key=True)
     joined_at = models.DateTimeField(auto_now_add=True)
 
