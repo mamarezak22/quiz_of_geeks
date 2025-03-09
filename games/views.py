@@ -173,7 +173,7 @@ class SubmitAnswerView(APIView):
 
 
 #game/{game_id}/result
-def GameResultView(APIView):
+class GameResultView(APIView):
     def get(self,request,game_id):
         try :
             game = Game.objects.get(id=game_id)
