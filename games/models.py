@@ -39,11 +39,11 @@ class GameRound(models.Model):
     #if returns 1 means user1 and 2 for user2.
     def turn(self):
         if self.starter_user == 1:
-            if self.count_of_answered_users == 0:
+            if self.count_of_passed_users == 0:
                 return 1
             return 2
         else:
-            if self.count_of_answered_users == 0:
+            if self.count_of_passed_users == 0:
                 return 2
             return 1
 

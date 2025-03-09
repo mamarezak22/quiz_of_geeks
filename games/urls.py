@@ -4,7 +4,7 @@ from .views import StartGameView, SubmitAnswerView, SelectCategoryView, Question
 urlpatterns = [
     path('game/start',
          StartGameView.as_view()),
-    path('game/<int:game_id>/round/<int:round_number>/select_category',
+    path('game/<int:game_id>/round/<int:round_number>/select_category/<str:category_name>',
          SelectCategoryView.as_view()),
     path('game/<int:game_id>/round/<int:round_number>/question/<int:question_number>',
          QuestionDetailView.as_view()),

@@ -38,7 +38,7 @@ class StartGameView(APIView):
                 return Response({'detail' : 'this user already have active games'},status=status.HTTP_400_BAD_REQUEST)
             last_game = Game.objects.filter(status = 'pre-started').order_by('created_at').first()
             #join the user to a game
-            if last_game.exists():
+            if last_game:
                 last_game.user2 = user
                 last_game.status = 'started'
                 last_game.save()
@@ -49,7 +49,7 @@ class StartGameView(APIView):
         else :
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#game/{game_id}/round/{round_number}/select_category
+#game/{game_id}/round/{round_number}/select_category/{category_name}
 class SelectCategoryView(APIView):
             def post(self, request, game_id,category_name):
                 try :
@@ -143,7 +143,7 @@ class SubmitAnswerView(APIView):
             if answer_taken_time.total_seconds() < 30:
                 detail_text = 'time been ended'
             else:
-                question.user1_answer = request.data.get['answer']
+                question.user1_answer = request.data.get('answer')
                 question.save()
                 if self.is_correct_answer(question,question.user1_answer):
                     detail_text = 'correct answer'
