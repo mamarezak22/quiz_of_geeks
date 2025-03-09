@@ -18,6 +18,10 @@ class Question(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created At'))
 
+    class Meta:
+        verbose_name = _('Question')
+        verbose_name_plural = _('Questions')
+
     def __str__(self):
         return self.text
 
@@ -27,6 +31,10 @@ class Answer(models.Model):
     )
     text = models.CharField(max_length=60, verbose_name=_('Answer Text'))
     is_correct = models.BooleanField(default=False, verbose_name=_('Is Correct'))
+
+    class Meta:
+        verbose_name = _('Answer')
+        verbose_name_plural = _('Answers')
 
     def __str__(self):
         return self.text
