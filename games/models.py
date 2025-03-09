@@ -7,8 +7,8 @@ class Game(models.Model):
         ('started', 'Started'),
         ('ended', 'Ended'),
     )
-    user1 = models.ForeignKey("users.User", on_delete=models.SET_NULL,related_name='games')
-    user2 = models.ForeignKey("users.User", on_delete=models.SET_NULL,related_name='games',blank=True, null=True)
+    user1 = models.ForeignKey("users.User", on_delete=models.SET_NULL,related_name='game_as_user1',blank=True,null=True)
+    user2 = models.ForeignKey("users.User", on_delete=models.SET_NULL,related_name='game_as_user2',blank=True, null=True)
     status = models.CharField(max_length=20,choices=game_statuses)
     created_at = models.DateTimeField(auto_now_add =True)
     ended_at = models.DateTimeField(blank=True, null=True)
@@ -64,8 +64,8 @@ class GameQuestion(models.Model):
     question_number = models.IntegerField(primary_key=True)
     round = models.ForeignKey(GameRound, on_delete=models.PROTECT, related_name='questions')
     question = models.ForeignKey("questions.Question", on_delete=models.PROTECT)
-    user1_answer = models.ForeignKey("questions.Answer", on_delete=models.PROTECT,blank = True, null=True)
-    user2_answer = models.ForeignKey("questions.Answer", on_delete=models.PROTECT,blank = True, null=True)
+    user1_answer = models.ForeignKey("questions.Answer", on_delete=models.PROTECT,blank = True, null=True,related_name='answer_as_user1')
+    user2_answer = models.ForeignKey("questions.Answer", on_delete=models.PROTECT,blank = True, null=True,related_name='answer_as_user2')
     start_time_for_user1 = models.DateTimeField(blank=True, null=True)
     start_time_for_user2 = models.DateTimeField(blank=True, null=True)
 
