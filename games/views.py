@@ -53,7 +53,7 @@ class StartGameView(APIView):
 class SelectCategoryView(APIView):
             def post(self, request, game_id,category_name):
                 try :
-                    game = Game.objects.get(id=game_id)
+                    game = Game.objects.get(id=game_id,status='started')
                 except Game.DoesNotExist:
                     return Response({'detail' : 'Game does not exist'}, status=status.HTTP_404_NOT_FOUND)
                 if game.status != 'active' :
@@ -75,7 +75,7 @@ class QuestionDetailView(APIView):
     if not a new gamequestion object creates and time starts for that user"""
     def get(self,game_id,round_number,question_number):
         try :
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(id=game_id,status = started)
         except Game.DoesNotExist:
             return Response({'detail' : 'Game does not exist'}, status=status.HTTP_404_NOT_FOUND)
         try :
@@ -131,7 +131,7 @@ class SubmitAnswerView(APIView):
         return False
 
     def post(self,request,game_id,round_number,question_number):
-        game = Game.objects.get(id=game_id)
+        game = Game.objects.get(id=game_id,status = 'started')
         round = GameRound.objects.get(game = game,
                                       round_number=round_number)
         question = GameQuestion.objects.get(question_number = question_number,
